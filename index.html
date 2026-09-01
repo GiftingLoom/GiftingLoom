@@ -1,4 +1,4 @@
-index
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1863,11 +1863,7 @@ carefully chosen materials.
 <article class="product-card">
 
 <div class="product-image">
-
-<img src="C:\Users\NEW\GiftingLoom\images\flowerbag - Copy.jpg"
-alt="Flowers Crochet Bag"
-onerror="this.src='https://placehold.co/600x600/f2d5c8/38251d?text=Daisy+Bag'">
-
+    <img src="images/flowersbag.jpg" alt="Flowers Crochet Bag">
 </div>
 
 <div class="product-info">
@@ -1886,7 +1882,8 @@ Soft, colorful and perfect for everyday use.
 ₹1,499
 </span>
 
-<button class="shop-small"
+<button type="button" class="shop-small"
+data-product="Flowers Crochet Bag"
 onclick="addToCart('Flowers Crochet Bag')">
 +
 </button>
@@ -1903,11 +1900,8 @@ onclick="addToCart('Flowers Crochet Bag')">
 <article class="product-card">
 
 <div class="product-image">
-
-<img src="C:\Users\NEW\GiftingLoom\images\Bouquet.jpg"
-alt="Flower Bouquet"
-onerror="this.src='https://placehold.co/600x600/f2cbc7/38251d?text=Crochet+Flower'">
-
+    
+    <img src="images/Bouquet.jpg" alt="Flower Bouquet">
 </div>
 
 <div class="product-info">
@@ -1926,7 +1920,8 @@ A forever Bouquet that never needs watering.
 ₹1500
 </span>
 
-<button class="shop-small"
+<button type="button" class="shop-small"
+data-product="Flower Bouquet"
 onclick="addToCart('Flower Bouquet')">
 +
 </button>
@@ -1943,11 +1938,7 @@ onclick="addToCart('Flower Bouquet')">
 <article class="product-card">
 
 <div class="product-image">
-
-<img src="C:\Users\NEW\GiftingLoom\images\Doll.jpg"
-alt="Cute Doll"
-onerror="this.src='https://placehold.co/600x600/ded3c1/38251d?text=Mini+Bear'">
-
+    <img src="images/Doll.jpg" alt="Cute Doll">
 </div>
 
 <div class="product-info">
@@ -1966,7 +1957,8 @@ Your handmade companion.
 ₹2000
 </span>
 
-<button class="shop-small"
+<button type="button" class="shop-small"
+data-product="Cute Doll"
 onclick="addToCart('Cute Doll')">
 +
 </button>
@@ -1983,17 +1975,13 @@ onclick="addToCart('Cute Doll')">
 <article class="product-card">
 
 <div class="product-image">
-
-<img src="C:\Users\NEW\GiftingLoom\images\Keychain.jpg"
-alt="Cute Tulip Keychain"
-onerror="this.src='https://placehold.co/600x600/dce3d4/38251d?text=Cozy+Beanie'">
-
+    <img src="images/Keychain.jpg" alt="Cute Daisy Keychain">
 </div>
 
 <div class="product-info">
 
 <h3>
-Cute Tulip Keychain
+Cute Daisy Keychain
 </h3>
 
 <p>
@@ -2006,7 +1994,8 @@ A crochet flower you can take anywhere and hang anywhere.
 ₹150
 </span>
 
-<button class="shop-small"
+<button type="button" class="shop-small"
+data-product="Cute Daisy Keychain"
 onclick="addToCart('Cute Daisy Keychain')">
 +
 </button>
@@ -2803,39 +2792,22 @@ function showToast(message, duration = 2500) {
 ========================= */
 
 const products = {
-
-    "Daisy Crochet Bag": {
-
+    "Flowers Crochet Bag": {
         price: 1499,
-
-        image: "images/daisy-bag.jpg"
-
+        image: "images/flowerbag - Copy.jpg"
     },
-
-    "Crochet Flower": {
-
-        price: 399,
-
-        image: "images/crochet-flower.jpg"
-
+    "Flower Bouquet": {
+        price: 1500,
+        image: "images/Bouquet.jpg"
     },
-
-    "Mini Bear": {
-
-        price: 599,
-
-        image: "images/mini-bear.jpg"
-
+    "Cute Doll": {
+        price: 2000,
+        image: "images/Doll.jpg"
     },
-
-    "Cozy Beanie": {
-
-        price: 899,
-
-        image: "images/cozy-beanie.jpg"
-
+    "Cute Daisy Keychain": {
+        price: 150,
+        image: "images/Keychain.jpg"
     }
-
 };
 
 
@@ -2886,7 +2858,11 @@ function addToCart(productName) {
     const product =
         products[productName];
 
-    if (!product) return;
+    if (!product) {
+        console.error("Product not found:", productName);
+        showToast("Sorry, that product could not be added.");
+        return;
+    }
 
 
     const existing =
@@ -3315,47 +3291,52 @@ event => {
     }
 
 
-    /*
-       For now the order is stored locally.
-       You can later connect this to
-       WhatsApp, Razorpay, Stripe or
-       your own backend.
-    */
+    const total = cart.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+    );
 
     const order = {
-
-        customer: {
-
-            name,
-            phone,
-            address
-
-        },
-
-        items: cart,
-
-        createdAt:
-            new Date().toISOString()
-
+        orderId: "GL-" + Date.now(),
+        customer: { name, phone, address },
+        items: cart.map(item => ({
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            subtotal: item.price * item.quantity
+        })),
+        total,
+        createdAt: new Date().toISOString()
     };
 
-
+    // Local backup so an order is not lost if the internet/Google connection fails.
     localStorage.setItem(
         "lastGiftingLoomOrder",
         JSON.stringify(order)
     );
 
-
-    cart = [];
-
+    /*
+      GOOGLE SHEETS CONNECTION
+      Replace this with your Google Apps Script Web App URL.
+    */
+     "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+if (GOOGLE_SHEETS_URL.startsWith("https://script.google.com/")) {
+    fetch(GOOGLE_SHEETS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(order)
+    }).catch(error => {
+        console.error("Google Sheets logging failed:", error);
+    });
+}
+      cart = [];
     saveCart();
-
     updateCart();
-
     checkoutForm.reset();
-
     closeCheckoutModal();
-
 
     showToast(
         "Order received! We'll contact you soon 💕",
@@ -3503,8 +3484,18 @@ event => {
 
 updateCart();
 
+// Initialize the cart display when the page loads.
+updateCart();
+
 </script>
 
 </body>
 </html>
 
+<!-- Inside your HTML file -->
+<script>
+  google.script.url.getLocation(function(location) {
+    console.log(location.parameters); // Logs URL parameters to browser console
+    console.log(location.hash);       // Logs the URL anchor hash
+  });
+</script>
